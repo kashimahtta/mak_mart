@@ -1,11 +1,10 @@
+// Cleaned script for Mak Mart — removes Google API inputs and fixes structure
 const girlBtn = document.getElementById("girlBtn");
 const boyBtn = document.getElementById("boyBtn");
 const modeSwitch = document.getElementById("modeSwitch");
 const cardsEl = document.getElementById("cards");
 const searchForm = document.getElementById("searchForm");
 const qInput = document.getElementById("q");
-const apiKeyInput = document.getElementById("apiKey");
-const cxInput = document.getElementById("cx");
 
 const DATA = {
   girls: [
@@ -23,7 +22,27 @@ const DATA = {
 };
 
 let current = "girls";
-const root = document.documentElement;
+const STORAGE_KEY = "mak_mart_data_v1";
+
+function loadSavedData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const obj = JSON.parse(raw);
+    if (obj.girls) DATA.girls = obj.girls;
+    if (obj.boys) DATA.boys = obj.boys;
+  } catch (e) {
+    console.warn("Failed to load saved data", e);
+  }
+}
+
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
+  } catch (e) {
+    console.warn("Failed to save", e);
+  }
+}
 
 function setTheme(kind) {
   document.body.classList.remove("theme-girls", "theme-boys");
@@ -37,28 +56,11 @@ function setTheme(kind) {
     boyBtn.classList.add("active");
     modeSwitch.checked = true;
   }
-  // Persistence helpers
-  const STORAGE_KEY = 'mak_mart_data_v1'
-  function loadSavedData(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if(!raw) return
-      const obj = JSON.parse(raw)
-      if(obj.girls) DATA.girls = obj.girls
-      if(obj.boys) DATA.boys = obj.boys
-    }catch(e){console.warn('Failed to load saved data', e)}
-  }
-  function saveData(){
-    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA)) }catch(e){console.warn('Failed to save', e)}
-  }
   current = kind;
 }
 
-    renderCards(DATA[current]);
+function renderCards(items) {
   cardsEl.innerHTML = "";
-
-  // load saved items (if any) before initial render
-  loadSavedData()
   if (!items || items.length === 0) {
     cardsEl.innerHTML = "<p>No items found.</p>";
     return;
@@ -93,66 +95,13 @@ modeSwitch.addEventListener("change", () => {
   showCurrent();
 });
 
-searchForm.addEventListener("submit", async (e) => {
+searchForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const q = qInput.value.trim();
   if (!q) {
     showCurrent();
     return;
   }
-
-
-  // Add-item form handling
-  const addForm = document.getElementById('addForm')
-  const addName = document.getElementById('addName')
-  const addPrice = document.getElementById('addPrice')
-  const addCategory = document.getElementById('addCategory')
-  const addAvailable = document.getElementById('addAvailable')
-
-  if(addForm){
-    addForm.addEventListener('submit', (e)=>{
-      e.preventDefault()
-      const name = addName.value.trim()
-      if(!name) return
-      const price = addPrice.value.trim() || 'Price N/A'
-      const available = !!addAvailable.checked
-      const category = addCategory.value === 'boys' ? 'boys' : 'girls'
-      const item = {name, price, available}
-      DATA[category].push(item)
-      saveData()
-      current = category
-      showCurrent()
-      addForm.reset()
-      addAvailable.checked = true
-    })
-  }
-  const key = apiKeyInput.value.trim();
-  const cx = cxInput.value.trim();
-  if (key && cx) {
-    // Use Google Custom Search JSON API if configured. Requires billing/API setup.
-    try {
-      const url = `https://www.googleapis.com/customsearch/v1?key=${encodeURIComponent(key)}&cx=${encodeURIComponent(cx)}&q=${encodeURIComponent(q)}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const items = (data.items || [])
-        .slice(0, 8)
-        .map((it) => ({
-          name: it.title,
-          price: "Price N/A",
-          available: true,
-          image:
-            it.pagemap && it.pagemap.cse_thumbnail
-              ? it.pagemap.cse_thumbnail[0].src
-              : null,
-        }));
-      renderCards(items);
-      return;
-    } catch (err) {
-      console.error("Google fetch failed", err);
-    }
-  }
-
-  // Fallback: filter local data
   const combined = [...DATA.girls, ...DATA.boys];
   const filtered = combined.filter((i) =>
     i.name.toLowerCase().includes(q.toLowerCase()),
@@ -160,5 +109,31 @@ searchForm.addEventListener("submit", async (e) => {
   renderCards(filtered);
 });
 
-// initial render
+// Add-item form handling
+const addForm = document.getElementById("addForm");
+const addName = document.getElementById("addName");
+const addPrice = document.getElementById("addPrice");
+const addCategory = document.getElementById("addCategory");
+const addAvailable = document.getElementById("addAvailable");
+
+if (addForm) {
+  addForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = addName.value.trim();
+    if (!name) return;
+    const price = addPrice.value.trim() || "Price N/A";
+    const available = !!addAvailable.checked;
+    const category = addCategory.value === "boys" ? "boys" : "girls";
+    const item = { name, price, available };
+    DATA[category].push(item);
+    saveData();
+    current = category;
+    showCurrent();
+    addForm.reset();
+    addAvailable.checked = true;
+  });
+}
+
+// load saved items then render
+loadSavedData();
 showCurrent();
