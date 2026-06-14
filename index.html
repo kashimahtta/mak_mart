@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Mak Mart — Toddler Mode Demo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="top">
+      <h1>Mak Mart</h1>
+      <div class="toggle">
+        <button id="girlBtn" class="mode-btn active">Girls (Pink)</button>
+        <div class="switch">
+          <input id="modeSwitch" type="checkbox" />
+          <label for="modeSwitch"></label>
+        </div>
+        <button id="boyBtn" class="mode-btn">Boys (Blue)</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="controls">
+        <form id="searchForm">
+          <input
+            id="q"
+            type="search"
+            placeholder="Search items or use Google API (optional)"
+          />
+          <button type="submit">Search</button>
+        </form>
+        <div class="api-config">
+          <input id="apiKey" placeholder="Google API Key (optional)" />
+          <input id="cx" placeholder="Google CSE ID (optional)" />
+        </div>
+      </section>
+
+      <section id="cards" class="cards" aria-live="polite"></section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
