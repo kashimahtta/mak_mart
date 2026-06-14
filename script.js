@@ -75,12 +75,16 @@ function renderCards(items) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "");
     const localPng = `assets/images/${normalized}.png`;
-    const localJpg = `assets/images/${normalized}.jpg`;
+      const normalized = it.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+      // candidate local paths (assets first, then images folder)
+      const candidates = []
+      if (it.image) candidates.push(it.image)
+      candidates.push(`assets/images/${normalized}.png`)
+      candidates.push(`images/${normalized}.png`)
+      candidates.push(`assets/images/${normalized}.jpg`)
+      candidates.push(`images/${normalized}.jpg`)
+      // final fallback is Unsplash
 
-    // create thumb and image element with progressive fallback: explicit image -> png -> jpg -> Unsplash
-    const thumb = document.createElement("div");
-    thumb.className = "thumb";
-    const img = document.createElement("img");
     img.alt = it.name;
     img.loading = "lazy";
 
@@ -94,16 +98,17 @@ function renderCards(items) {
       img.src = localPng;
       img.onerror = function () {
         if (this.src.endsWith(".png")) {
-          this.src = localJpg;
-        } else if (this.src.endsWith(".jpg")) {
-          this.src = `https://source.unsplash.com/400x300/?${encodeURIComponent(it.name)}`;
-        } else {
-          this.src = `https://source.unsplash.com/400x300/?${encodeURIComponent(it.name)}`;
+        let idx = 0
+        function tryNext(){
+          if(idx >= candidates.length){
+            img.onerror = null
+            img.src = `https://source.unsplash.com/400x300/?${encodeURIComponent(it.name)}`
+            return
+          }
+          img.onerror = function(){ idx++; tryNext() }
+          img.src = candidates[idx]
         }
-      };
-    }
-
-    thumb.appendChild(img);
+        tryNext()
 
     const title = document.createElement("h3");
     title.textContent = it.name;
