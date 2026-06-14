@@ -1,5 +1,3 @@
-const girlBtn = document.getElementById("girlBtn");
-const boyBtn = document.getElementById("boyBtn");
 const modeSwitch = document.getElementById("modeSwitch");
 const cardsEl = document.getElementById("cards");
 const searchForm = document.getElementById("searchForm");
@@ -23,7 +21,7 @@ const DATA = {
 const IMAGE_MAP = {
   Lipstick: "images/lipstick.png.jpeg",
   Top: "images/top.jpeg",
-  Frock: null,
+  Frock: "images/frock.jpeg",
   Serum: "images/serum.jpeg",
   "T-shirt": "images/tshirt.jpeg",
   Comb: "images/comb.png.jpeg",
@@ -127,15 +125,7 @@ function renderCards(items) {
 function setTheme(kind) {
   document.body.classList.remove("theme-girls", "theme-boys");
   document.body.classList.add(kind === "girls" ? "theme-girls" : "theme-boys");
-  if (kind === "girls") {
-    girlBtn.classList.add("active");
-    boyBtn.classList.remove("active");
-    modeSwitch.checked = false;
-  } else {
-    girlBtn.classList.remove("active");
-    boyBtn.classList.add("active");
-    modeSwitch.checked = true;
-  }
+  modeSwitch.checked = kind === "boys";
   current = kind;
 }
 
@@ -206,16 +196,6 @@ searchForm.addEventListener("submit", (e) => {
   renderCards(filtered);
 });
 
-girlBtn.addEventListener("click", () => {
-  current = "girls";
-  setTheme("girls");
-  renderCards(DATA.girls);
-});
-boyBtn.addEventListener("click", () => {
-  current = "boys";
-  setTheme("boys");
-  renderCards(DATA.boys);
-});
 modeSwitch.addEventListener("change", () => {
   const next = modeSwitch.checked ? "boys" : "girls";
   current = next;
