@@ -115,6 +115,7 @@ const addName = document.getElementById("addName");
 const addPrice = document.getElementById("addPrice");
 const addCategory = document.getElementById("addCategory");
 const addAvailable = document.getElementById("addAvailable");
+const addImage = document.getElementById("addImage");
 
 if (addForm) {
   addForm.addEventListener("submit", (e) => {
@@ -123,8 +124,9 @@ if (addForm) {
     if (!name) return;
     const price = addPrice.value.trim() || "Price N/A";
     const available = !!addAvailable.checked;
+    const image = addImage && addImage.value.trim() ? addImage.value.trim() : null;
     const category = addCategory.value === "boys" ? "boys" : "girls";
-    const item = { name, price, available };
+    const item = { name, price, available, image };
     DATA[category].push(item);
     saveData();
     current = category;
