@@ -68,15 +68,60 @@ function renderCards(items) {
   items.forEach((it) => {
     const c = document.createElement("article");
     c.className = "card";
-    // choose image: explicit image URL if provided, otherwise use Unsplash source by query
-    const imgSrc = it.image
-      ? it.image
-      : `https://source.unsplash.com/400x300/?${encodeURIComponent(it.name)}`;
-    c.innerHTML = `
-      <div class="thumb"><img src="${imgSrc}" alt="${it.name}" loading="lazy"/></div>
-      <h3>${it.name}</h3>
-      <div class="meta"><span>${it.price || "Price N/A"}</span><span class="badge">${it.available ? "In stock" : "Out of stock"}</span></div>
-    `;
+
+    // normalized local filename based on item name
+    const normalized = it.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+    const localPng = `assets/images/${normalized}.png`;
+    const localJpg = `assets/images/${normalized}.jpg`;
+
+    // create thumb and image element with progressive fallback: explicit image -> png -> jpg -> Unsplash
+    const thumb = document.createElement("div");
+    thumb.className = "thumb";
+    const img = document.createElement("img");
+    img.alt = it.name;
+    img.loading = "lazy";
+
+    if (it.image) {
+      img.src = it.image;
+      img.onerror = function () {
+        this.onerror = null;
+        this.src = `https://source.unsplash.com/400x300/?${encodeURIComponent(it.name)}`;
+      };
+    } else {
+      img.src = localPng;
+      img.onerror = function () {
+        if (this.src.endsWith(".png")) {
+          this.src = localJpg;
+        } else if (this.src.endsWith(".jpg")) {
+          this.src = `https://source.unsplash.com/400x300/?${encodeURIComponent(it.name)}`;
+        } else {
+          this.src = `https://source.unsplash.com/400x300/?${encodeURIComponent(it.name)}`;
+        }
+      };
+    }
+
+    thumb.appendChild(img);
+
+    const title = document.createElement("h3");
+    title.textContent = it.name;
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    const price = document.createElement("span");
+    price.textContent = it.price || "Price N/A";
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = it.available ? "In stock" : "Out of stock";
+
+    meta.appendChild(price);
+    meta.appendChild(badge);
+
+    c.appendChild(thumb);
+    c.appendChild(title);
+    c.appendChild(meta);
     cardsEl.appendChild(c);
   });
 }

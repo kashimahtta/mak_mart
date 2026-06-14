@@ -21,3 +21,8 @@ Notes:
 
 - The Google Custom Search API requires an API key and a configured Custom Search Engine (CSE ID). If not provided, the UI filters local demo data.
 - This is a minimal demo; extend item objects with images/pricing from your backend or a real shopping API.
+
+Local images:
+
+- You can add local images to `assets/images/` using the normalized item name rule: `assets/images/<item-name>.png` or `.jpg`.
+- Example: for `Lipstick` add `assets/images/lipstick.png`. The app tries `.png` then `.jpg`, then falls back to an automatic Unsplash image.
