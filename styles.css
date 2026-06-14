@@ -30,6 +30,33 @@ body {
 .top h1 {
   margin: 0;
   font-size: 1.2rem;
+
+  .add-form {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .add-form input,
+  .add-form select {
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+  .add-form button {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 0;
+    background: #111;
+    color: #fff;
+    cursor: pointer;
+  }
+  .add-form .inline {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+  }
 }
 .toggle {
   display: flex;

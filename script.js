@@ -37,11 +37,28 @@ function setTheme(kind) {
     boyBtn.classList.add("active");
     modeSwitch.checked = true;
   }
+  // Persistence helpers
+  const STORAGE_KEY = 'mak_mart_data_v1'
+  function loadSavedData(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if(!raw) return
+      const obj = JSON.parse(raw)
+      if(obj.girls) DATA.girls = obj.girls
+      if(obj.boys) DATA.boys = obj.boys
+    }catch(e){console.warn('Failed to load saved data', e)}
+  }
+  function saveData(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA)) }catch(e){console.warn('Failed to save', e)}
+  }
   current = kind;
 }
 
-function renderCards(items) {
+    renderCards(DATA[current]);
   cardsEl.innerHTML = "";
+
+  // load saved items (if any) before initial render
+  loadSavedData()
   if (!items || items.length === 0) {
     cardsEl.innerHTML = "<p>No items found.</p>";
     return;
@@ -84,6 +101,31 @@ searchForm.addEventListener("submit", async (e) => {
     return;
   }
 
+
+  // Add-item form handling
+  const addForm = document.getElementById('addForm')
+  const addName = document.getElementById('addName')
+  const addPrice = document.getElementById('addPrice')
+  const addCategory = document.getElementById('addCategory')
+  const addAvailable = document.getElementById('addAvailable')
+
+  if(addForm){
+    addForm.addEventListener('submit', (e)=>{
+      e.preventDefault()
+      const name = addName.value.trim()
+      if(!name) return
+      const price = addPrice.value.trim() || 'Price N/A'
+      const available = !!addAvailable.checked
+      const category = addCategory.value === 'boys' ? 'boys' : 'girls'
+      const item = {name, price, available}
+      DATA[category].push(item)
+      saveData()
+      current = category
+      showCurrent()
+      addForm.reset()
+      addAvailable.checked = true
+    })
+  }
   const key = apiKeyInput.value.trim();
   const cx = cxInput.value.trim();
   if (key && cx) {

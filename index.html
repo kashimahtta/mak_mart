@@ -10,12 +10,12 @@
     <header class="top">
       <h1>Mak Mart</h1>
       <div class="toggle">
-        <button id="girlBtn" class="mode-btn active">Girls (Pink)</button>
+        <button id="girlBtn" class="mode-btn active">Girlieess</button>
         <div class="switch">
           <input id="modeSwitch" type="checkbox" />
           <label for="modeSwitch"></label>
         </div>
-        <button id="boyBtn" class="mode-btn">Boys (Blue)</button>
+        <button id="boyBtn" class="mode-btn">Desiii Boyzzzz</button>
       </div>
     </header>
 
@@ -33,6 +33,22 @@
           <input id="apiKey" placeholder="Google API Key (optional)" />
           <input id="cx" placeholder="Google CSE ID (optional)" />
         </div>
+        <form id="addForm" class="add-form" title="Add new item">
+          <input
+            id="addName"
+            placeholder="Item name (e.g. Lipstick)"
+            required
+          />
+          <input id="addPrice" placeholder="Price (e.g. ₹299)" />
+          <select id="addCategory">
+            <option value="girls">Girls (pink)</option>
+            <option value="boys">Boys (blue)</option>
+          </select>
+          <label class="inline"
+            ><input id="addAvailable" type="checkbox" checked /> In stock</label
+          >
+          <button type="submit">Add Item</button>
+        </form>
       </section>
 
       <section id="cards" class="cards" aria-live="polite"></section>
