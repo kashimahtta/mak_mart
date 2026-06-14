@@ -4,10 +4,6 @@ const modeSwitch = document.getElementById("modeSwitch");
 const cardsEl = document.getElementById("cards");
 const searchForm = document.getElementById("searchForm");
 const qInput = document.getElementById("q");
-const compareA = document.getElementById("compareA");
-const compareB = document.getElementById("compareB");
-const compareBtn = document.getElementById("compareBtn");
-const comparePanel = document.getElementById("comparePanel");
 
 const DATA = {
   girls: [
@@ -22,6 +18,17 @@ const DATA = {
     { name: "HotWheels", price: "₹199", available: false },
     { name: "Toothbrush", price: "₹129", available: true },
   ],
+};
+
+const IMAGE_MAP = {
+  Lipstick: "images/lipstick.png.jpeg",
+  Top: "images/top.jpeg",
+  Frock: null,
+  Serum: "images/serum.jpeg",
+  "T-shirt": "images/tshirt.jpeg",
+  Comb: "images/comb.png.jpeg",
+  HotWheels: "images/hotwheels.jpeg",
+  Toothbrush: "images/toothbrush.jpeg",
 };
 
 let current = "girls";
@@ -47,21 +54,23 @@ function saveData() {
   }
 }
 
-function normalizeName(name) {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
 function resolveImageSrc(item) {
-  const normalized = normalizeName(item.name);
   const candidates = [];
   if (item.image) candidates.push(item.image);
-  candidates.push(`assets/images/${normalized}.png`);
-  candidates.push(`images/${normalized}.png`);
-  candidates.push(`assets/images/${normalized}.jpg`);
-  candidates.push(`images/${normalized}.jpg`);
+  const mapped = IMAGE_MAP[item.name];
+  if (mapped) candidates.push(mapped);
+  candidates.push(
+    `images/${item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.png`,
+  );
+  candidates.push(
+    `images/${item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.jpg`,
+  );
+  candidates.push(
+    `assets/images/${item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.png`,
+  );
+  candidates.push(
+    `assets/images/${item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.jpg`,
+  );
   candidates.push(
     `https://source.unsplash.com/400x300/?${encodeURIComponent(item.name)}`,
   );
