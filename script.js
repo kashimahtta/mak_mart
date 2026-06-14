@@ -68,8 +68,12 @@ function renderCards(items) {
   items.forEach((it) => {
     const c = document.createElement("article");
     c.className = "card";
+    // choose image: explicit image URL if provided, otherwise use Unsplash source by query
+    const imgSrc = it.image
+      ? it.image
+      : `https://source.unsplash.com/400x300/?${encodeURIComponent(it.name)}`;
     c.innerHTML = `
-      <div class="thumb">${it.image ? `<img src="${it.image}" alt="${it.name}"/>` : it.name.charAt(0)}</div>
+      <div class="thumb"><img src="${imgSrc}" alt="${it.name}" loading="lazy"/></div>
       <h3>${it.name}</h3>
       <div class="meta"><span>${it.price || "Price N/A"}</span><span class="badge">${it.available ? "In stock" : "Out of stock"}</span></div>
     `;
@@ -124,7 +128,8 @@ if (addForm) {
     if (!name) return;
     const price = addPrice.value.trim() || "Price N/A";
     const available = !!addAvailable.checked;
-    const image = addImage && addImage.value.trim() ? addImage.value.trim() : null;
+    const image =
+      addImage && addImage.value.trim() ? addImage.value.trim() : null;
     const category = addCategory.value === "boys" ? "boys" : "girls";
     const item = { name, price, available, image };
     DATA[category].push(item);
