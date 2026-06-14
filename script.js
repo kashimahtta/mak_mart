@@ -1,10 +1,13 @@
-// Cleaned script for Mak Mart — removes Google API inputs and fixes structure
 const girlBtn = document.getElementById("girlBtn");
 const boyBtn = document.getElementById("boyBtn");
 const modeSwitch = document.getElementById("modeSwitch");
 const cardsEl = document.getElementById("cards");
 const searchForm = document.getElementById("searchForm");
 const qInput = document.getElementById("q");
+const compareA = document.getElementById("compareA");
+const compareB = document.getElementById("compareB");
+const compareBtn = document.getElementById("compareBtn");
+const comparePanel = document.getElementById("comparePanel");
 
 const DATA = {
   girls: [
@@ -44,19 +47,37 @@ function saveData() {
   }
 }
 
-function setTheme(kind) {
-  document.body.classList.remove("theme-girls", "theme-boys");
-  document.body.classList.add(kind === "girls" ? "theme-girls" : "theme-boys");
-  if (kind === "girls") {
-    girlBtn.classList.add("active");
-    boyBtn.classList.remove("active");
-    modeSwitch.checked = false;
-  } else {
-    girlBtn.classList.remove("active");
-    boyBtn.classList.add("active");
-    modeSwitch.checked = true;
-  }
-  current = kind;
+function normalizeName(name) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function resolveImageSrc(item) {
+  const normalized = normalizeName(item.name);
+  const candidates = [];
+  if (item.image) candidates.push(item.image);
+  candidates.push(`assets/images/${normalized}.png`);
+  candidates.push(`images/${normalized}.png`);
+  candidates.push(`assets/images/${normalized}.jpg`);
+  candidates.push(`images/${normalized}.jpg`);
+  candidates.push(
+    `https://source.unsplash.com/400x300/?${encodeURIComponent(item.name)}`,
+  );
+
+  const img = document.createElement("img");
+  img.alt = item.name;
+  img.loading = "lazy";
+  let index = 0;
+  img.onerror = function () {
+    index += 1;
+    if (index < candidates.length) {
+      img.src = candidates[index];
+    }
+  };
+  img.src = candidates[index];
+  return img;
 }
 
 function renderCards(items) {
@@ -66,49 +87,12 @@ function renderCards(items) {
     return;
   }
   items.forEach((it) => {
-    const c = document.createElement("article");
-    c.className = "card";
+    const card = document.createElement("article");
+    card.className = "card";
 
-    // normalized local filename based on item name
-    const normalized = it.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
-    const localPng = `assets/images/${normalized}.png`;
-      const normalized = it.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-      // candidate local paths (assets first, then images folder)
-      const candidates = []
-      if (it.image) candidates.push(it.image)
-      candidates.push(`assets/images/${normalized}.png`)
-      candidates.push(`images/${normalized}.png`)
-      candidates.push(`assets/images/${normalized}.jpg`)
-      candidates.push(`images/${normalized}.jpg`)
-      // final fallback is Unsplash
-
-    img.alt = it.name;
-    img.loading = "lazy";
-
-    if (it.image) {
-      img.src = it.image;
-      img.onerror = function () {
-        this.onerror = null;
-        this.src = `https://source.unsplash.com/400x300/?${encodeURIComponent(it.name)}`;
-      };
-    } else {
-      img.src = localPng;
-      img.onerror = function () {
-        if (this.src.endsWith(".png")) {
-        let idx = 0
-        function tryNext(){
-          if(idx >= candidates.length){
-            img.onerror = null
-            img.src = `https://source.unsplash.com/400x300/?${encodeURIComponent(it.name)}`
-            return
-          }
-          img.onerror = function(){ idx++; tryNext() }
-          img.src = candidates[idx]
-        }
-        tryNext()
+    const thumb = document.createElement("div");
+    thumb.className = "thumb";
+    thumb.appendChild(resolveImageSrc(it));
 
     const title = document.createElement("h3");
     title.textContent = it.name;
@@ -124,46 +108,112 @@ function renderCards(items) {
     meta.appendChild(price);
     meta.appendChild(badge);
 
-    c.appendChild(thumb);
-    c.appendChild(title);
-    c.appendChild(meta);
-    cardsEl.appendChild(c);
+    card.appendChild(thumb);
+    card.appendChild(title);
+    card.appendChild(meta);
+    cardsEl.appendChild(card);
   });
 }
 
-function showCurrent() {
-  setTheme(current);
-  renderCards(DATA[current]);
+function setTheme(kind) {
+  document.body.classList.remove("theme-girls", "theme-boys");
+  document.body.classList.add(kind === "girls" ? "theme-girls" : "theme-boys");
+  if (kind === "girls") {
+    girlBtn.classList.add("active");
+    boyBtn.classList.remove("active");
+    modeSwitch.checked = false;
+  } else {
+    girlBtn.classList.remove("active");
+    boyBtn.classList.add("active");
+    modeSwitch.checked = true;
+  }
+  current = kind;
 }
 
-girlBtn.addEventListener("click", () => {
-  current = "girls";
-  showCurrent();
-});
-boyBtn.addEventListener("click", () => {
-  current = "boys";
-  showCurrent();
-});
-modeSwitch.addEventListener("change", () => {
-  current = modeSwitch.checked ? "boys" : "girls";
-  showCurrent();
-});
+function getAllItems() {
+  return [
+    ...DATA.girls.map((item, index) => ({ category: "girls", index, item })),
+    ...DATA.boys.map((item, index) => ({ category: "boys", index, item })),
+  ];
+}
+
+function populateCompareOptions() {
+  const items = getAllItems();
+  compareA.innerHTML = "";
+  compareB.innerHTML = "";
+  items.forEach((record) => {
+    const label = `${record.item.name} (${record.category})`;
+    const value = `${record.category}|${record.index}`;
+    const optionA = document.createElement("option");
+    optionA.value = value;
+    optionA.textContent = label;
+    compareA.appendChild(optionA);
+    const optionB = document.createElement("option");
+    optionB.value = value;
+    optionB.textContent = label;
+    compareB.appendChild(optionB);
+  });
+  if (compareA.options.length > 1) {
+    compareB.selectedIndex = 1;
+  }
+}
+
+function renderCompare() {
+  const valueA = compareA.value;
+  const valueB = compareB.value;
+  if (!valueA || !valueB) return;
+  const [catA, idxA] = valueA.split("|");
+  const [catB, idxB] = valueB.split("|");
+  const itemA = DATA[catA][Number(idxA)];
+  const itemB = DATA[catB][Number(idxB)];
+  comparePanel.innerHTML = "";
+  [itemA, itemB].forEach((item) => {
+    if (!item) return;
+    const card = document.createElement("div");
+    card.className = "compare-card";
+    const img = resolveImageSrc(item);
+    const name = document.createElement("h3");
+    name.textContent = item.name;
+    const price = document.createElement("div");
+    price.textContent = item.price || "Price N/A";
+    card.appendChild(img);
+    card.appendChild(name);
+    card.appendChild(price);
+    comparePanel.appendChild(card);
+  });
+}
 
 searchForm.addEventListener("submit", (e) => {
   e.preventDefault();
-  const q = qInput.value.trim();
+  const q = qInput.value.trim().toLowerCase();
   if (!q) {
-    showCurrent();
+    renderCards(DATA[current]);
     return;
   }
   const combined = [...DATA.girls, ...DATA.boys];
-  const filtered = combined.filter((i) =>
-    i.name.toLowerCase().includes(q.toLowerCase()),
+  const filtered = combined.filter((item) =>
+    item.name.toLowerCase().includes(q),
   );
   renderCards(filtered);
 });
 
-// Add-item form handling
+girlBtn.addEventListener("click", () => {
+  current = "girls";
+  setTheme("girls");
+  renderCards(DATA.girls);
+});
+boyBtn.addEventListener("click", () => {
+  current = "boys";
+  setTheme("boys");
+  renderCards(DATA.boys);
+});
+modeSwitch.addEventListener("change", () => {
+  const next = modeSwitch.checked ? "boys" : "girls";
+  current = next;
+  setTheme(next);
+  renderCards(DATA[next]);
+});
+
 const addForm = document.getElementById("addForm");
 const addName = document.getElementById("addName");
 const addPrice = document.getElementById("addPrice");
@@ -185,12 +235,23 @@ if (addForm) {
     DATA[category].push(item);
     saveData();
     current = category;
-    showCurrent();
+    setTheme(category);
+    renderCards(DATA[category]);
+    populateCompareOptions();
+    renderCompare();
     addForm.reset();
     addAvailable.checked = true;
   });
 }
 
-// load saved items then render
+if (compareBtn) {
+  compareBtn.addEventListener("click", () => {
+    renderCompare();
+  });
+}
+
 loadSavedData();
-showCurrent();
+setTheme(current);
+renderCards(DATA[current]);
+populateCompareOptions();
+renderCompare();

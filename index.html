@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Mak Mart — Toddler Mode Demo</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -10,12 +10,12 @@
     <header class="top">
       <h1>Mak Mart</h1>
       <div class="toggle">
-        <button id="girlBtn" class="mode-btn active">Girlieess</button>
+        <button id="girlBtn" class="mode-btn active">Girls</button>
         <div class="switch">
           <input id="modeSwitch" type="checkbox" />
           <label for="modeSwitch"></label>
         </div>
-        <button id="boyBtn" class="mode-btn">Desiii Boyzzzz</button>
+        <button id="boyBtn" class="mode-btn">Boys</button>
       </div>
     </header>
 
@@ -23,7 +23,9 @@
       <section class="controls">
         <form id="searchForm">
           <input id="q" type="search" placeholder="Search items" />
-          <button type="submit">Sem>
+          <button type="submit">Search</button>
+        </form>
+
         <form id="addForm" class="add-form" title="Add new item">
           <input
             id="addName"
@@ -41,6 +43,16 @@
           >
           <button type="submit">Add Item</button>
         </form>
+      </section>
+
+      <section class="compare-section">
+        <h2>Compare Images</h2>
+        <div class="compare-controls">
+          <select id="compareA"></select>
+          <select id="compareB"></select>
+          <button id="compareBtn" type="button">Compare</button>
+        </div>
+        <div id="comparePanel" class="compare-panel"></div>
       </section>
 
       <section id="cards" class="cards" aria-live="polite"></section>
